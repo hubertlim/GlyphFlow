@@ -21,52 +21,6 @@ const lhInput = document.getElementById('lineHeight')
 const presetsEl = document.getElementById('presets')
 const themesEl = document.getElementById('themes')
 
-const linkBtn = document.getElementById('linkBtn')
-const fsBtn = document.getElementById('fsBtn')
-
-// --- URL State ---
-function getState() {
-  return {
-    t: textInput.value,
-    f: fontSelect.value,
-    s: fontSizeInput.value,
-    sh: shapeSelect.value,
-    c: colorSelect.value,
-    sp: speedInput.value,
-    lh: lhInput.value,
-  }
-}
-
-function stateToHash(state) {
-  return '#' + btoa(unescape(encodeURIComponent(JSON.stringify(state))))
-}
-
-function hashToState(hash) {
-  try {
-    return JSON.parse(decodeURIComponent(escape(atob(hash.slice(1)))))
-  } catch { return null }
-}
-
-function loadFromHash() {
-  const state = hashToState(location.hash)
-  if (!state) return
-  if (state.t) textInput.value = state.t
-  if (state.f) fontSelect.value = state.f
-  if (state.s) fontSizeInput.value = state.s
-  if (state.sh) shapeSelect.value = state.sh
-  if (state.c) colorSelect.value = state.c
-  if (state.sp) { speedInput.value = state.sp; document.getElementById('speedVal').textContent = parseFloat(state.sp).toFixed(1) }
-  if (state.lh) { lhInput.value = state.lh; document.getElementById('lhVal').textContent = parseFloat(state.lh).toFixed(1) }
-}
-
-function syncHash() { history.replaceState(null, '', stateToHash(getState())) }
-
-// Sync hash on any control change
-for (const el of [textInput, fontSelect, fontSizeInput, shapeSelect, colorSelect, speedInput, lhInput]) {
-  el.addEventListener('input', syncHash)
-  el.addEventListener('change', syncHash)
-}
-
 // --- Themes (preset combinations) ---
 const THEMES = [
   { name: 'Midnight', shape: 'sine', color: 'ocean', font: 'Inter', size: 28, speed: 0.8, lh: 1.4, text: 'Drifting through the deep blue silence where light bends and time dissolves into the current' },
@@ -89,7 +43,6 @@ function applyTheme(t) {
   lhInput.value = t.lh
   document.getElementById('speedVal').textContent = t.speed.toFixed(1)
   document.getElementById('lhVal').textContent = t.lh.toFixed(1)
-  syncHash()
 }
 
 THEMES.forEach(t => {
@@ -295,30 +248,4 @@ speedInput.oninput = () => { document.getElementById('speedVal').textContent = p
 lhInput.oninput = () => { document.getElementById('lhVal').textContent = parseFloat(lhInput.value).toFixed(1) }
 
 // --- Start ---
-loadFromHash()
 document.fonts.ready.then(() => requestAnimationFrame(render))
-
-// --- Copy Link ---
-linkBtn.onclick = () => {
-  syncHash()
-  navigator.clipboard.writeText(location.href).then(() => {
-    linkBtn.textContent = '✓ Copied'
-    linkBtn.classList.add('copied')
-    setTimeout(() => { linkBtn.textContent = '🔗 Copy Link'; linkBtn.classList.remove('copied') }, 1500)
-  })
-}
-
-// --- Fullscreen ---
-fsBtn.onclick = () => {
-  document.querySelector('.app').classList.toggle('fullscreen')
-  const isFs = document.querySelector('.app').classList.contains('fullscreen')
-  fsBtn.textContent = isFs ? '⛶ Exit' : '⛶ Fullscreen'
-}
-
-// Escape exits fullscreen
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    document.querySelector('.app').classList.remove('fullscreen')
-    fsBtn.textContent = '⛶ Fullscreen'
-  }
-})

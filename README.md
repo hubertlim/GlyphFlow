@@ -2,8 +2,7 @@
 
 > Kinetic text art generator — text shaped into animated forms, rendered to Canvas at 60fps with zero DOM measurement.
 
-<!-- TODO: replace with actual screenshot -->
-![GlyphFlow screenshot](docs/screenshot.png)
+![GlyphFlow demo](docs/screenshoot.gif)
 
 Powered by [@chenglou/pretext](https://github.com/chenglou/pretext), a pure JavaScript library that measures and lays out multiline text without triggering DOM reflow. GlyphFlow uses its `layoutNextLine()` API to assign a different width to every line, creating dynamic shapes (sine waves, funnels, diamonds) that animate in real-time.
 

@@ -19,6 +19,38 @@ const colorSelect = document.getElementById('colorSelect')
 const speedInput = document.getElementById('speed')
 const lhInput = document.getElementById('lineHeight')
 const presetsEl = document.getElementById('presets')
+const themesEl = document.getElementById('themes')
+
+// --- Themes (preset combinations) ---
+const THEMES = [
+  { name: 'Midnight', shape: 'sine', color: 'ocean', font: 'Inter', size: 28, speed: 0.8, lh: 1.4, text: 'Drifting through the deep blue silence where light bends and time dissolves into the current' },
+  { name: 'Cyberpunk', shape: 'zigzag', color: 'cyberpunk', font: 'JetBrains Mono', size: 22, speed: 1.5, lh: 1.3, text: 'ERR0R::cascade//overflow ██ fragments.lost ░░ rebui1ding.from" ashes ▓▓ signal::found' },
+  { name: 'Sunset', shape: 'diamond', color: 'sunset', font: 'Playfair Display', size: 32, speed: 0.6, lh: 1.5, text: 'The horizon burns amber and gold as the last light paints the clouds in fire and memory' },
+  { name: 'Matrix', shape: 'collapse', color: 'forest', font: 'JetBrains Mono', size: 20, speed: 1.2, lh: 1.2, text: 'const reality = decode(stream).filter(signal => signal.truth > threshold).map(awaken)' },
+  { name: 'Neon City', shape: 'heartbeat', color: 'neon', font: 'Inter', size: 26, speed: 1.8, lh: 1.4, text: 'Neon signs flicker above rain-slicked streets where every shadow hides a story waiting to be told' },
+  { name: 'Zen Garden', shape: 'spiral', color: 'mono', font: 'Playfair Display', size: 30, speed: 0.4, lh: 1.6, text: 'Breathe in clarity. Breathe out complexity. The code writes itself when the mind is still.' },
+  { name: 'Retro Wave', shape: 'staircase', color: 'thermal', font: 'Inter', size: 24, speed: 1.0, lh: 1.3, text: 'Synthesizers hum beneath a grid of infinite purple horizons where the bass never drops' },
+  { name: 'Polyglot', shape: 'hourglass', color: 'rainbow', font: 'Inter', size: 26, speed: 0.7, lh: 1.4, text: 'Hello world. 春天到了、桜が咲いた。بدأت الرحلة الآن 🚀 Début du voyage ✨' },
+]
+
+function applyTheme(t) {
+  textInput.value = t.text
+  fontSelect.value = t.font
+  fontSizeInput.value = t.size
+  shapeSelect.value = t.shape
+  colorSelect.value = t.color
+  speedInput.value = t.speed
+  lhInput.value = t.lh
+  document.getElementById('speedVal').textContent = t.speed.toFixed(1)
+  document.getElementById('lhVal').textContent = t.lh.toFixed(1)
+}
+
+THEMES.forEach(t => {
+  const btn = document.createElement('button')
+  btn.textContent = t.name
+  btn.onclick = () => applyTheme(t)
+  themesEl.appendChild(btn)
+})
 
 // --- Presets ---
 const PRESETS = [
@@ -44,6 +76,23 @@ function getLineWidth(shape, i, total, base, t) {
     case 'funnel': return base * (0.3 + 0.7 * norm)
     case 'diamond': return base * (0.3 + 0.7 * (1 - Math.abs(norm * 2 - 1)))
     case 'heartbeat': return base * (0.4 + 0.5 * Math.abs(Math.sin(norm * Math.PI * 4 + t)))
+    case 'zigzag': return base * (0.4 + 0.5 * (i % 2 === 0 ? norm : 1 - norm))
+    case 'spiral': return base * (0.3 + 0.6 * (0.5 + 0.5 * Math.sin(norm * Math.PI * 6 + t)) * norm)
+    case 'collapse': {
+      const wave = Math.sin(norm * Math.PI * 3 + t * 2)
+      const decay = 1 - norm * 0.6
+      return base * (0.3 + 0.6 * (0.5 + 0.5 * wave) * decay)
+    }
+    case 'hourglass': {
+      const mid = Math.abs(norm - 0.5) * 2 // 1 at edges, 0 at center
+      return base * (0.3 + 0.65 * mid)
+    }
+    case 'staircase': {
+      const steps = 5
+      const step = Math.floor(norm * steps) / steps
+      const bounce = 0.5 + 0.5 * Math.sin(t + step * Math.PI * 2)
+      return base * (0.35 + 0.55 * bounce)
+    }
     default: return base
   }
 }
@@ -58,6 +107,20 @@ function getLineColor(mode, i, total, widthRatio) {
     case 'rainbow': return hsl(norm * 360, 80, 65)
     case 'thermal': return hsl(widthRatio * 60, 90, 40 + widthRatio * 30)
     case 'mono': return hsl(260, 10, 60 + widthRatio * 25)
+    case 'ocean': return hsl(190 + norm * 40, 70, 35 + widthRatio * 35)
+    case 'neon': {
+      const colors = [320, 280, 180, 60, 320] // pink → purple → cyan → yellow → pink
+      const idx = norm * (colors.length - 1)
+      const lo = Math.floor(idx), hi = Math.min(lo + 1, colors.length - 1)
+      const frac = idx - lo
+      return hsl(colors[lo] + (colors[hi] - colors[lo]) * frac, 100, 55 + widthRatio * 15)
+    }
+    case 'sunset': return hsl(20 + norm * 30, 85, 45 + widthRatio * 25)
+    case 'forest': return hsl(100 + norm * 60, 60, 30 + widthRatio * 35)
+    case 'cyberpunk': {
+      const flicker = Math.sin(i * 2.5) > 0 ? 300 : 180 // magenta / cyan alternation
+      return hsl(flicker, 100, 50 + widthRatio * 20)
+    }
     default: return '#e2e8f0'
   }
 }

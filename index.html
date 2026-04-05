@@ -40,6 +40,16 @@
     .btn-save { background: #1a1a24; color: #a78bfa; border: 1px solid #2e2e3e !important; }
     .btn-save:hover { background: #2e2e3e; }
 
+    /* Footer */
+    .footer { padding: 0.75rem 1.25rem; border-top: 1px solid #1e1e2e; font-size: 0.7rem; color: #6b7280; }
+    .footer a { color: #a78bfa; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+    .footer-links { display: flex; gap: 1rem; margin-top: 0.4rem; }
+    .footer-links a { display: inline-flex; align-items: center; gap: 0.3rem; color: #9ca3af;
+      font-size: 0.7rem; padding: 0.2rem 0.5rem; border: 1px solid #2e2e3e; border-radius: 4px;
+      transition: all 0.15s; }
+    .footer-links a:hover { color: #c4b5fd; border-color: #7c3aed; background: #1a1a24; }
+
     /* Canvas area */
     .canvas-wrap { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
     canvas { background: #0a0a0f; }
@@ -125,6 +135,16 @@
       <div class="actions">
         <button class="btn-play" id="playBtn">⏸ Pause</button>
         <button class="btn-save" id="saveBtn">💾 Save PNG</button>
+      </div>
+
+      <div class="footer">
+        Powered by <a href="https://github.com/chenglou/pretext" target="_blank" rel="noopener">Pretext</a>
+        by <a href="https://github.com/chenglou" target="_blank" rel="noopener">Cheng Lou</a>
+        <div class="footer-links">
+          <a href="https://github.com/hubertlim/GlyphFlow" target="_blank" rel="noopener">⭐ Star</a>
+          <a href="https://github.com/hubertlim/GlyphFlow/fork" target="_blank" rel="noopener">🍴 Fork</a>
+          <a href="https://github.com/hubertlim/GlyphFlow/issues" target="_blank" rel="noopener">💡 Ideas</a>
+        </div>
       </div>
     </aside>
 

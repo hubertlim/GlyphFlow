@@ -1,5 +1,5 @@
 services:
-  pretext-demo:
+  glyphflow:
     build: .
     ports:
       - "3000:3000"

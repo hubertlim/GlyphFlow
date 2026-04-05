@@ -1,7 +1,12 @@
 {
-  "name": "pretext-demo",
+  "name": "glyphflow",
   "private": true,
+  "description": "Kinetic text art generator powered by @chenglou/pretext",
   "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

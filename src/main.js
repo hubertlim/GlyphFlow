@@ -148,7 +148,6 @@ function render(timestamp) {
   for (let i = 0; i < lines.length; i++) {
     const w = getLineWidth(shape, i, lines.length, baseWidth, time)
     const xL = (W - w) / 2
-    const xR = (W + w) / 2
     const y = startY + i * lineH + lineH / 2
     if (i === 0) { ctx.moveTo(xL, y) } else { ctx.lineTo(xL, y) }
   }

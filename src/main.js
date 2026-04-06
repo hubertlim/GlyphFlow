@@ -4,6 +4,10 @@ import { prepareWithSegments, layoutNextLine } from '@chenglou/pretext'
 let playing = true
 let time = 0
 let lastFrame = 0
+let currentShape = null
+let prevShapeWidths = null
+let shapeTransitionStart = 0
+const SHAPE_TRANSITION_MS = 500
 
 // --- DOM refs ---
 const canvas = document.getElementById('canvas')
@@ -155,27 +159,51 @@ function render(timestamp) {
   const font = `${fontSize}px "${fontFamily}"`
   const lhMult = parseFloat(lhInput.value)
   const lineH = Math.round(fontSize * lhMult)
-  const shape = shapeSelect.value
   const colorMode = colorSelect.value
-  const baseWidth = W * 0.75
+  const breathe = 1 + 0.06 * Math.sin(time * 0.8) // breathing pulse
+  const baseWidth = W * 0.75 * breathe
 
   let prepared
   try {
     prepared = prepareWithSegments(text, font)
   } catch { requestAnimationFrame(render); return }
 
+  // Detect shape change for smooth transition
+  const shape = shapeSelect.value
+  if (shape !== currentShape) {
+    // Capture current widths as prev before switching
+    if (currentShape !== null) {
+      prevShapeWidths = []
+      const maxEst = Math.ceil(H / lineH) + 5
+      for (let i = 0; i < maxEst; i++) {
+        prevShapeWidths.push(getLineWidth(currentShape, i, maxEst, baseWidth, time))
+      }
+      shapeTransitionStart = timestamp
+    }
+    currentShape = shape
+  }
+
+  const transitionProgress = Math.min(1, (timestamp - shapeTransitionStart) / SHAPE_TRANSITION_MS)
+  const eased = transitionProgress < 1 ? transitionProgress * (2 - transitionProgress) : 1 // ease-out
+
   // First pass: collect all lines to know total count
   const lines = []
   let cursor = { segmentIndex: 0, graphemeIndex: 0 }
-  // Estimate max lines to prevent infinite loop
   const maxLines = Math.ceil(H / lineH) + 5
   for (let i = 0; i < maxLines; i++) {
-    const w = getLineWidth(shape, i, maxLines, baseWidth, time)
+    let w = getLineWidth(shape, i, maxLines, baseWidth, time)
+    // Smooth transition from previous shape
+    if (prevShapeWidths && eased < 1 && i < prevShapeWidths.length) {
+      w = prevShapeWidths[i] + (w - prevShapeWidths[i]) * eased
+    }
     const line = layoutNextLine(prepared, cursor, Math.max(w, 40))
     if (!line) break
     lines.push({ ...line, usedWidth: w })
     cursor = line.end
   }
+
+  // Clear transition state when done
+  if (eased >= 1) prevShapeWidths = null
 
   // Center vertically
   const totalH = lines.length * lineH
@@ -192,6 +220,9 @@ function render(timestamp) {
     ctx.font = font
     ctx.fillStyle = getLineColor(colorMode, i, lines.length, widthRatio)
 
+    // Depth opacity — narrower lines fade slightly
+    ctx.globalAlpha = 0.45 + 0.55 * widthRatio
+
     // Subtle glow for wider lines
     if (colorMode !== 'mono') {
       ctx.shadowColor = ctx.fillStyle
@@ -203,6 +234,7 @@ function render(timestamp) {
     ctx.fillText(line.text, x, startY + i * lineH)
   }
   ctx.shadowBlur = 0
+  ctx.globalAlpha = 1
 
   // Draw shape guide (subtle)
   ctx.strokeStyle = 'rgba(167, 139, 250, 0.08)'
@@ -233,7 +265,10 @@ function render(timestamp) {
 // --- Controls ---
 playBtn.onclick = () => {
   playing = !playing
-  playBtn.textContent = playing ? '⏸ Pause' : '▶ Play'
+  playBtn.querySelector('span').textContent = playing ? 'Pause' : 'Play'
+  playBtn.querySelector('svg').innerHTML = playing
+    ? '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>'
+    : '<polygon points="5,3 19,12 5,21"/>'
   playBtn.classList.toggle('paused', !playing)
 }
 
